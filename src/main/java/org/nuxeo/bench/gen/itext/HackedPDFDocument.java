@@ -1,4 +1,4 @@
-package org.nuxeo.bench.gen;
+package org.nuxeo.bench.gen.itext;
 
 import com.itextpdf.kernel.pdf.PdfDocument;
 import com.itextpdf.kernel.pdf.PdfReader;

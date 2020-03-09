@@ -3,6 +3,9 @@ package org.nuxeo.bench.rnd;
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileReader;
+import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.io.Reader;
 import java.text.SimpleDateFormat;
 import java.time.Instant;
 import java.util.ArrayList;
@@ -27,9 +30,17 @@ public class RandomDataGenerator {
 		return input;
 	}
 	
+	public void init(InputStream csv) throws Exception {
+		init(new InputStreamReader(csv));		
+	}
+	
 	public void init(File csv) throws Exception {
+		init(new FileReader(csv));
+	}
+	
+	protected void init(Reader csvReader) throws Exception {
 						
-		try (BufferedReader reader = new BufferedReader(new FileReader(csv))) {
+		try (BufferedReader reader = new BufferedReader(csvReader)) {
 			
 			String line = reader.readLine(); // skip first line
 			line = reader.readLine();

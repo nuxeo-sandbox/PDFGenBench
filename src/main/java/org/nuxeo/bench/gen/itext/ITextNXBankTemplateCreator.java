@@ -1,6 +1,7 @@
-package org.nuxeo.bench.gen;
+package org.nuxeo.bench.gen.itext;
 
 import java.io.File;
+import java.io.InputStream;
 import java.io.OutputStream;
 import java.nio.file.Files;
 import java.text.NumberFormat;
@@ -11,7 +12,7 @@ import java.util.Date;
 import java.util.List;
 import java.util.Locale;
 
-import org.nuxeo.bench.gen.smt.SmtConst;
+import org.nuxeo.bench.gen.PDFTemplateGenerator;
 
 import com.itextpdf.io.image.ImageData;
 import com.itextpdf.io.image.ImageDataFactory;
@@ -31,8 +32,19 @@ import com.itextpdf.layout.element.Text;
 import com.itextpdf.layout.property.TextAlignment;
 import com.itextpdf.layout.property.UnitValue;
 
-public class ITextNXBankTemplateCreator implements PDFGenerator {
+public class ITextNXBankTemplateCreator implements PDFTemplateGenerator {
 
+	
+	public static final String[] KEYS = new String[] { 
+			"#NAME-----------------------------------#",
+			"#STREET------------#",
+			"#CITY--------------#", 
+			"#STATE-------------#",				
+			"#DATE--------------#",
+			"#ACCOUNTID---------#",};
+
+	public static final String ACCOUNT_LABEL = "Primary Account Number: ";
+	
 	protected class Operation {
 
 		protected String label;
@@ -45,13 +57,9 @@ public class ITextNXBankTemplateCreator implements PDFGenerator {
 	protected List<Operation> operations;
 	protected ImageData img;
 
-	@Override
-	public String getName() {
-		return this.getClass().getSimpleName();
-	}
 
 	@Override
-	public void init(File input) throws Exception {
+	public void init(InputStream in) throws Exception {
 
 		operations = new ArrayList<ITextNXBankTemplateCreator.Operation>();
 
@@ -68,13 +76,13 @@ public class ITextNXBankTemplateCreator implements PDFGenerator {
 			operations.add(op);
 		}
 
-		if (input != null) {
-			img = ImageDataFactory.create(Files.readAllBytes(input.toPath()));
+		if (in != null) {
+			img = ImageDataFactory.create(in.readAllBytes());
 		}
 	}
 
 	@Override
-	public void generate(OutputStream out, OutputStream thumb) throws Exception {
+	public void generate(OutputStream out) throws Exception {
 
 		PdfDocument pdfDocument = new HackedPDFDocument(new PdfWriter(out));
 
@@ -87,12 +95,12 @@ public class ITextNXBankTemplateCreator implements PDFGenerator {
 		}
 
 		document.add(new Paragraph().setTextAlignment(TextAlignment.LEFT).setMultipliedLeading(1)
-				.add(new Text("\n" + SmtConst.KEYS[0])).setFontSize(14).setBold().add(new Text("\n" + SmtConst.KEYS[1]))
-				.setFontSize(14).setBold().add(new Text("\n" + SmtConst.KEYS[2])).setFontSize(14).setBold()
-				.add(new Text("\n" + SmtConst.KEYS[3])).setFontSize(14).setBold());
+				.add(new Text("\n" + KEYS[0])).setFontSize(14).setBold().add(new Text("\n" + KEYS[1]))
+				.setFontSize(14).setBold().add(new Text("\n" + KEYS[2])).setFontSize(14).setBold()
+				.add(new Text("\n" + KEYS[3])).setFontSize(14).setBold());
 		document.add(new Paragraph().setTextAlignment(TextAlignment.RIGHT).setMultipliedLeading(1)
-				.add(new Text("Primary Account Number: " + SmtConst.KEYS[4])).setFontSize(14).setBold()
-				.add("\n" + SmtConst.KEYS[5]));
+				.add(new Text(ACCOUNT_LABEL + KEYS[4])).setFontSize(14).setBold()
+				.add("\n" + KEYS[5]));
 
 		LineSeparator sep = new LineSeparator(new SolidLine());
 		document.add(sep);
@@ -100,6 +108,7 @@ public class ITextNXBankTemplateCreator implements PDFGenerator {
 		document.add(buildOperationsList(operations));
 		document.close();
 	}
+
 
 	protected Table buildOperationsList(List<Operation> operations) {
 

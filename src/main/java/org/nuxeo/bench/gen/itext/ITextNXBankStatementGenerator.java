@@ -1,19 +1,15 @@
-package org.nuxeo.bench.gen;
+package org.nuxeo.bench.gen.itext;
 
 import java.io.ByteArrayInputStream;
-import java.io.File;
+import java.io.InputStream;
 import java.io.OutputStream;
-import java.nio.file.Files;
 import java.security.DigestOutputStream;
 import java.security.MessageDigest;
 import java.util.HashMap;
 import java.util.Map;
 
-import javax.xml.bind.DatatypeConverter;
-
-import org.nuxeo.bench.gen.smt.SmtConst;
+import org.nuxeo.bench.gen.PDFFileGenerator;
 import org.nuxeo.bench.gen.smt.SmtMeta;
-import org.nuxeo.bench.gen.smt.StatementPDFGenerator;
 import org.nuxeo.bench.rnd.RandomDataGenerator;
 
 import com.itextpdf.kernel.pdf.PdfDictionary;
@@ -27,9 +23,7 @@ import com.itextpdf.kernel.pdf.PdfVersion;
 import com.itextpdf.kernel.pdf.PdfWriter;
 import com.itextpdf.kernel.pdf.WriterProperties;
 
-public class ITextNXBankStatementGenerator implements PDFGenerator, StatementPDFGenerator {
-
-	protected File pdf;
+public class ITextNXBankStatementGenerator implements PDFFileGenerator {
 
 	protected byte[] template;
 
@@ -47,11 +41,11 @@ public class ITextNXBankStatementGenerator implements PDFGenerator, StatementPDF
 		this.rndGen = rndGen;
 	}
 
-	public void init(File pdf) throws Exception {
+	public void init(InputStream pdf, String[] keys) throws Exception {
 
-		this.pdf = pdf;
-		template = Files.readAllBytes(pdf.toPath());
-
+		template = new byte[pdf.available()];
+		pdf.read(template);
+		
 		PdfReader pdfReader = new PdfReader(new ByteArrayInputStream(template));
 		PdfDocument doc = new PdfDocument(pdfReader);
 
@@ -64,8 +58,8 @@ public class ITextNXBankStatementGenerator implements PDFGenerator, StatementPDF
 			PdfStream stream = (PdfStream) object;
 			byte[] data = stream.getBytes();
 			String txt = new String(data);
-			for (int k = 0; k < SmtConst.KEYS.length; k++) {
-				String key = SmtConst.KEYS[k];
+			for (int k = 0; k < keys.length; k++) {
+				String key = keys[k];
 				int idx = 0;
 				do {
 					idx = txt.indexOf(key, idx);
@@ -77,10 +71,6 @@ public class ITextNXBankStatementGenerator implements PDFGenerator, StatementPDF
 			}
 		}
 		doc.close();
-	}
-
-	public void generate(OutputStream buffer, OutputStream thumb) throws Exception {
-		generate(buffer);
 	}
 
 	public SmtMeta generate(OutputStream buffer) throws Exception {
@@ -122,7 +112,7 @@ public class ITextNXBankStatementGenerator implements PDFGenerator, StatementPDF
 
 		if (db != null) {
 			byte[] digest = db.getMessageDigest().digest();
-			String md5 = DatatypeConverter.printHexBinary(digest).toUpperCase();
+			String md5 = toHexString(digest).toUpperCase();
 
 			return new SmtMeta(md5, tokens);
 		}
@@ -130,4 +120,17 @@ public class ITextNXBankStatementGenerator implements PDFGenerator, StatementPDF
 		return new SmtMeta(null, tokens);
 	}
 
+	protected static String toHexString(byte[] bytes) {
+		StringBuilder hexString = new StringBuilder();
+
+		for (int i = 0; i < bytes.length; i++) {
+			String hex = Integer.toHexString(0xFF & bytes[i]);
+			if (hex.length() == 1) {
+				hexString.append('0');
+			}
+			hexString.append(hex);
+		}
+
+		return hexString.toString();
+	}
 }
