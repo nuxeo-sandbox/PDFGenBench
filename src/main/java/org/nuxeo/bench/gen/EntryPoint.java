@@ -7,6 +7,7 @@ import java.io.InputStream;
 import org.apache.commons.cli.CommandLine;
 import org.apache.commons.cli.CommandLineParser;
 import org.apache.commons.cli.DefaultParser;
+import org.apache.commons.cli.HelpFormatter;
 import org.apache.commons.cli.Options;
 import org.apache.commons.cli.ParseException;
 import org.apache.logging.log4j.Level;
@@ -59,8 +60,10 @@ public class EntryPoint {
 		Logger logger = ctx.getLogger("import");		
 
 		Options options = new Options();
-		options.addOption("t", "threads", false, "Number of threads");
-		options.addOption("n", "nbPdfs", false, "Number of PDF to generate");
+		options.addOption("t", "threads", true, "Number of threads");
+		options.addOption("n", "nbThreads", true, "Number of PDF to generate");
+		options.addOption("h", "help", false, "Help");
+		
 		CommandLineParser parser = new DefaultParser();
 
 		CommandLine cmd = null;
@@ -70,9 +73,15 @@ public class EntryPoint {
 			System.err.println("Parsing failed.  Reason: " + exp.getMessage());
 		}
 
-		int nbThreads = Integer.parseInt(cmd.getOptionValue("t", "10"));
-		int nbPdfs = Integer.parseInt(cmd.getOptionValue("n", "100000"));
+		int nbThreads = Integer.parseInt(cmd.getOptionValue('t', "10"));
+		int nbPdfs = Integer.parseInt(cmd.getOptionValue('n', "100000"));
 
+		if (cmd.hasOption('h')) {
+			 HelpFormatter formatter = new HelpFormatter();
+		     formatter.printHelp("PDFGenerator", options);
+		     return;
+		}
+		
 		rootLogger.log(Level.INFO, "Init Injector");
 		rootLogger.log(Level.INFO, "  Threads:" + nbThreads);
 		rootLogger.log(Level.INFO, "  pdfs:" + nbPdfs);
