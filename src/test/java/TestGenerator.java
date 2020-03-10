@@ -7,6 +7,9 @@ import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileInputStream;
 import java.net.URL;
+import java.nio.file.CopyOption;
+import java.nio.file.Files;
+import java.nio.file.StandardCopyOption;
 
 import org.apache.pdfbox.pdmodel.PDDocument;
 import org.apache.pdfbox.util.PDFTextStripper;
@@ -157,6 +160,11 @@ public class TestGenerator {
 		for (var i = 0; i < keys.length; i++) {
 			assertFalse(txt.contains(keys[i]));
 		}
+		
+		File tmp = File.createTempFile("test", ".pdf");;
+		Files.copy(new ByteArrayInputStream(pdf), tmp.toPath(),StandardCopyOption.REPLACE_EXISTING);
+		
+		System.out.println(tmp.getAbsolutePath());
 
 	}
 

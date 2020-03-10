@@ -20,6 +20,9 @@ public class Injector {
 	protected int callsPerThreads = 5000;
 	protected final PDFFileGenerator gen;
 
+	protected BlobWriter writer;
+	
+
 	protected Logger rootLogger;
 	protected Logger logger;
 
@@ -36,6 +39,14 @@ public class Injector {
 		this.rootLogger = rootLogger;
 	}
 
+	public BlobWriter getWriter() {
+		return writer;
+	}
+
+	public void setWriter(BlobWriter writer) {
+		this.writer = writer;
+	}	
+	
 	protected void log(String message) {
 		if (rootLogger != null) {
 			rootLogger.log(Level.INFO, message);
@@ -68,7 +79,7 @@ public class Injector {
 		long t0 = System.currentTimeMillis();
 
 		final class Task implements Runnable {
-
+			
 			@Override
 			public void run() {
 				ByteArrayOutputStream buffer = new ByteArrayOutputStream(BUFFER_SIZE);
@@ -76,6 +87,9 @@ public class Injector {
 					try {
 						buffer.reset();
 						SmtMeta meta = gen.generate(buffer);
+						if (writer!=null) {
+							writer.write(buffer.toByteArray(), meta.getDigest());
+						}
 						log(meta);
 						counter.incrementAndGet();
 					} catch (Exception e) {

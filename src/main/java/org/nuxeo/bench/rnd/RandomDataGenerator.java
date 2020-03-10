@@ -20,6 +20,7 @@ public class RandomDataGenerator {
 	protected ArrayList<String> streets = new ArrayList<String>();
 	protected ArrayList<String> cities = new ArrayList<String>();
 	protected ArrayList<String> states = new ArrayList<String>();
+	protected ArrayList<String> companies = new ArrayList<String>();
 
 	protected SimpleDateFormat df = new SimpleDateFormat("MMM DD YYYY");
 	protected static final int DR = 5 * 365 * 24 * 3600 * 1000;
@@ -69,6 +70,9 @@ public class RandomDataGenerator {
 						states.add("NY");
 					}
 				}
+				if (parts.length > 6 && parts[6] != null && !parts[6].isEmpty())
+					companies.add(clean(parts[6]));
+				
 				line = reader.readLine();
 			} while (line != null);
 		}
@@ -78,7 +82,7 @@ public class RandomDataGenerator {
 		String[] result=null;
 		
 		if (generateOperations) {
-			result = new String [6+14*2 + 1];
+			result = new String [6+14*2 + 1+1];
 		} else {
 			result = new String [6];
 		}
@@ -115,13 +119,20 @@ public class RandomDataGenerator {
 
 	}
 
-	protected String getFormatedRandomAmount(int size) {
-		double amount = (Math.random() * Math.pow(10, 8)) / 100;
+	
+	protected double getRandomAmount() {
+		return (Math.random() * Math.pow(10, 5)) / 100;
+	}
+	
+	protected String getFormatedRandomAmount(double amount, int size) {
 		String formattedValue = NumberFormat.getCurrencyInstance(new Locale("en", "US")).format(amount);
 		return pad(formattedValue, size, false);		
 	}
 
 	protected String pad(String v, int size, boolean left) {
+		if (v.length()> size) {
+			v = v.substring(0, size-1);
+		}
 		if (left) {
 			return v + " ".repeat(size - v.length()) ;
 		} else {
@@ -131,14 +142,21 @@ public class RandomDataGenerator {
 	
 	protected void fillOperations(String[] result) {
 		int idx = 6;
-		result[idx] = getFormatedRandomAmount(12);
+		double total = getRandomAmount()*30;
+		result[idx] = getFormatedRandomAmount(total, 12);
 		idx++;
 
+		String opName ="";
 		for (int i = 1; i < 15; i++) {
-			result[idx] = pad("Operation whatever", 20, true);
+			opName = companies.get((int) Math.round(Math.random() * (companies.size() - 1))); 
+			result[idx] = pad(opName, 30, true);
 			idx++;
-			result[idx] = getFormatedRandomAmount(12);
+			double op = getRandomAmount();
+			result[idx] = getFormatedRandomAmount(op, 12);
+			total = total - op;
 			idx++;
 		}
+		
+		result[idx] = getFormatedRandomAmount(total, 12);
 	}
 }

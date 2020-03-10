@@ -6,6 +6,9 @@ import java.util.Calendar;
 
 import org.nuxeo.bench.gen.PDFTemplateGenerator;
 
+import com.itextpdf.kernel.colors.WebColors;
+import com.itextpdf.layout.borders.Border;
+import com.itextpdf.layout.element.Cell;
 import com.itextpdf.layout.element.Table;
 import com.itextpdf.layout.property.TextAlignment;
 
@@ -34,7 +37,7 @@ public class ITextNXBankTemplateCreator2 extends ITextNXBankTemplateCreator impl
 			Operation op = new Operation();
 
 			
-			op.label = mkTag("OP-" + String.format("%02d", i), 20) ;
+			op.label = mkTag("OP-" + String.format("%02d", i), 30) ;
 			keys.add(op.label);			
 			
 			cal = Calendar.getInstance();
@@ -47,8 +50,7 @@ public class ITextNXBankTemplateCreator2 extends ITextNXBankTemplateCreator impl
 			operations.add(op);
 		}
 		
-		//System.out.println(keys.size());
-		
+		keys.add(mkTag("Total",12));		
 	}
 
 	@Override
@@ -65,13 +67,17 @@ public class ITextNXBankTemplateCreator2 extends ITextNXBankTemplateCreator impl
 			table.addCell(createCell(op.label).setTextAlignment(TextAlignment.CENTER));
 
 			if (op.label.startsWith("#OP")) {
-				table.addCell(createCell(op.strValue)).setTextAlignment(TextAlignment.RIGHT);
-				table.addCell(createCell(""));				
+				table.addCell(createCell(op.strValue)).setTextAlignment(TextAlignment.CENTER);
+				table.addCell(createCell("").setBackgroundColor(WebColors.getRGBColor("#DDDDDD")));				
 			} else {
-				table.addCell(createCell(""));
-				table.addCell(createCell(op.strValue)).setTextAlignment(TextAlignment.RIGHT);
+				table.addCell(createCell("").setBackgroundColor(WebColors.getRGBColor("#DDDDDD")));
+				table.addCell(createCell(op.strValue)).setTextAlignment(TextAlignment.CENTER);
 			} 
 		}
+		table.addCell(new Cell(1, 4).setBorder(Border.NO_BORDER));
+		table.addCell(new Cell(1, 3).setBorder(Border.NO_BORDER));
+		table.addCell(createCell(mkTag("Total", 12)+ "     ")).setTextAlignment(TextAlignment.CENTER);
+
 		
 	}
 

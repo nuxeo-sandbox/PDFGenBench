@@ -129,8 +129,8 @@ public class ITextNXBankTemplateCreator implements PDFTemplateGenerator {
 	protected Table buildOperationsList(List<Operation> operations) {
 
 		Table table = new Table(
-				new UnitValue[] { new UnitValue(UnitValue.PERCENT, 25.0f), new UnitValue(UnitValue.PERCENT, 25.0f),
-						new UnitValue(UnitValue.PERCENT, 25.0f), new UnitValue(UnitValue.PERCENT, 25.0f) })
+				new UnitValue[] { new UnitValue(UnitValue.PERCENT, 20.0f), new UnitValue(UnitValue.PERCENT, 40.0f),
+						new UnitValue(UnitValue.PERCENT, 20.0f), new UnitValue(UnitValue.PERCENT, 20.0f) })
 								.setWidth(UnitValue.createPercentValue(100)).setMarginTop(10).setMarginBottom(10);
 
 		table.addHeaderCell(createCell("Date:").setTextAlignment(TextAlignment.CENTER).setBold());

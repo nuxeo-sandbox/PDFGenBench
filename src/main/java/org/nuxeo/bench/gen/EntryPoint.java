@@ -22,6 +22,9 @@ import org.apache.logging.log4j.core.config.builder.api.RootLoggerComponentBuild
 import org.apache.logging.log4j.core.config.builder.impl.BuiltConfiguration;
 import org.nuxeo.bench.gen.itext.ITextNXBankStatementGenerator;
 import org.nuxeo.bench.gen.itext.ITextNXBankTemplateCreator;
+import org.nuxeo.bench.gen.itext.ITextNXBankTemplateCreator2;
+import org.nuxeo.bench.gen.out.FolderWriter;
+import org.nuxeo.bench.gen.out.TmpWriter;
 import org.nuxeo.bench.rnd.RandomDataGenerator;
 
 public class EntryPoint {
@@ -62,6 +65,8 @@ public class EntryPoint {
 		Options options = new Options();
 		options.addOption("t", "threads", true, "Number of threads");
 		options.addOption("n", "nbThreads", true, "Number of PDF to generate");
+		options.addOption("m", "template", true, "Template: 1 or 2 (default)");
+		options.addOption("o", "output", true, "output: mem(default), tmp, file:<path>, s3:<url>");
 		options.addOption("h", "help", false, "Help");
 		
 		CommandLineParser parser = new DefaultParser();
@@ -75,7 +80,19 @@ public class EntryPoint {
 
 		int nbThreads = Integer.parseInt(cmd.getOptionValue('t', "10"));
 		int nbPdfs = Integer.parseInt(cmd.getOptionValue('n', "100000"));
-
+		int template = Integer.parseInt(cmd.getOptionValue('m', "2"));
+		
+		String out = cmd.getOptionValue('o', "mem");
+		BlobWriter writer = null;
+		if (TmpWriter.NAME.equalsIgnoreCase(out)) {
+			rootLogger.log(Level.INFO, "Inititialize Tmp Writer");
+			writer = new TmpWriter();
+		} if (out.startsWith(FolderWriter.NAME)) {
+			String folder = out.substring(FolderWriter.NAME.length());
+			rootLogger.log(Level.INFO, "Inititialize Folder Writer in " + folder);
+			writer = new FolderWriter(folder);
+		}
+		
 		if (cmd.hasOption('h')) {
 			 HelpFormatter formatter = new HelpFormatter();
 		     formatter.printHelp("PDFGenerator", options);
@@ -87,23 +104,35 @@ public class EntryPoint {
 		rootLogger.log(Level.INFO, "  pdfs:" + nbPdfs);
 
 		try {
-			runInjector(nbPdfs, nbThreads, rootLogger, logger);
+			runInjector(nbPdfs, nbThreads, template, rootLogger, logger, writer);
 		} catch (Exception e) {
 			System.err.println("Error while running Injector " + e);
 			e.printStackTrace();
 		}
 	}
 
-	protected static void runInjector(int total, int threads, Logger rootLogger, Logger logger) throws Exception {
+	protected static void runInjector(int total, int threads, int template, Logger rootLogger, Logger logger, BlobWriter writer) throws Exception {
 
 		// Data Generator
-		RandomDataGenerator rnd = new RandomDataGenerator(false);
+		RandomDataGenerator rnd = null;
+		ITextNXBankTemplateCreator templateGen = null;
+		
+		rootLogger.log(Level.INFO, "using template " + template);
+		
+		if (template==1) {
+			rnd = new RandomDataGenerator(false);
+			templateGen = new ITextNXBankTemplateCreator();
+		} else {
+			rnd = new RandomDataGenerator(true);
+			templateGen= new ITextNXBankTemplateCreator2();
+		}
+
+		// init random data generator
 		InputStream csv = EntryPoint.class.getResourceAsStream("/data.csv");
 		rnd.init(csv);
 
 		// Generate the template
 		InputStream logo = EntryPoint.class.getResourceAsStream("/NxBank3.png");
-		ITextNXBankTemplateCreator templateGen = new ITextNXBankTemplateCreator();
 		templateGen.init(logo);
 
 		ByteArrayOutputStream templateOut = new ByteArrayOutputStream();
@@ -117,6 +146,9 @@ public class EntryPoint {
 		gen.setRndGenerator(rnd);
 
 		Injector injector = new Injector(gen, total, threads, rootLogger, logger);
+		
+		injector.setWriter(writer);
+		
 		injector.run();
 
 	}
