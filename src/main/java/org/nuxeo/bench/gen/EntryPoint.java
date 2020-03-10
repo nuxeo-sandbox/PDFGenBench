@@ -97,7 +97,7 @@ public class EntryPoint {
 	protected static void runInjector(int total, int threads, Logger rootLogger, Logger logger) throws Exception {
 
 		// Data Generator
-		RandomDataGenerator rnd = new RandomDataGenerator();
+		RandomDataGenerator rnd = new RandomDataGenerator(false);
 		InputStream csv = EntryPoint.class.getResourceAsStream("/data.csv");
 		rnd.init(csv);
 
@@ -112,7 +112,7 @@ public class EntryPoint {
 
 		// Init PDF generator
 		ITextNXBankStatementGenerator gen = new ITextNXBankStatementGenerator();
-		gen.init(new ByteArrayInputStream(templateData), ITextNXBankTemplateCreator.KEYS);
+		gen.init(new ByteArrayInputStream(templateData), templateGen.getKeys());
 		gen.computeDigest = true;
 		gen.setRndGenerator(rnd);
 

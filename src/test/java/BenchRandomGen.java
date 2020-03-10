@@ -16,7 +16,7 @@ public class BenchRandomGen {
 	@Test
 	public void testGen() throws Exception {
 
-		RandomDataGenerator gen = new RandomDataGenerator();
+		RandomDataGenerator gen = new RandomDataGenerator(false);
 
 		URL url = this.getClass().getResource("data.csv");
 		File csv = new File(url.toURI());

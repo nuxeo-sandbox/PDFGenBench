@@ -14,7 +14,7 @@ import org.nuxeo.bench.gen.smt.SmtMeta;
 public class Injector {
 
 	protected int NB_THREADS = 10;
-	protected static final int BUFFER_SIZE = 10 * 2014;;
+	protected static final int BUFFER_SIZE = 10 * 1024;;
 
 	protected int total;
 	protected int callsPerThreads = 5000;

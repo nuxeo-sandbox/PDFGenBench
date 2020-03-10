@@ -18,7 +18,7 @@ public class TestInjector {
 	public void testInjector() throws Exception {
 		
 		// Data Generator
-		RandomDataGenerator rnd = new RandomDataGenerator();
+		RandomDataGenerator rnd = new RandomDataGenerator(false);
 		URL csvurl = this.getClass().getResource("data.csv");
 		File csv = new File(csvurl.toURI());
 		rnd.init(csv);
@@ -35,7 +35,7 @@ public class TestInjector {
 		
 		// Init PDF generator
 		ITextNXBankStatementGenerator gen = new ITextNXBankStatementGenerator();
-		gen.init(new ByteArrayInputStream(templateData), ITextNXBankTemplateCreator.KEYS);
+		gen.init(new ByteArrayInputStream(templateData), templateGen.getKeys());
 		gen.computeDigest=true;
 		gen.setRndGenerator(rnd);		
 		

@@ -7,6 +7,8 @@ public interface PDFTemplateGenerator {
 	
 	void init(InputStream input) throws Exception;
 	
+	String[] getKeys();
+	
 	void generate(OutputStream pdf) throws Exception;
 	
 }

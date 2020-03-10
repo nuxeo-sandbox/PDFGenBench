@@ -1,9 +1,7 @@
 package org.nuxeo.bench.gen.itext;
 
-import java.io.File;
 import java.io.InputStream;
 import java.io.OutputStream;
-import java.nio.file.Files;
 import java.text.NumberFormat;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
@@ -34,14 +32,18 @@ import com.itextpdf.layout.property.UnitValue;
 
 public class ITextNXBankTemplateCreator implements PDFTemplateGenerator {
 
+	public static String mkTag(String value, int size) {		
+		String tag = "#" + value;		
+		return tag + "-".repeat(size-1-tag.length()) + "#";		
+	}
 	
-	public static final String[] KEYS = new String[] { 
-			"#NAME-----------------------------------#",
-			"#STREET------------#",
-			"#CITY--------------#", 
-			"#STATE-------------#",				
-			"#DATE--------------#",
-			"#ACCOUNTID---------#",};
+	public static final String[] _keys = new String[] { 
+			mkTag("NAME",41),
+			mkTag("STREET",20),
+			mkTag("CITY",20), 
+			mkTag("STATE",20),				
+			mkTag("DATE",20),
+			mkTag("ACCOUNTID",20),};
 
 	public static final String ACCOUNT_LABEL = "Primary Account Number: ";
 	
@@ -52,17 +54,15 @@ public class ITextNXBankTemplateCreator implements PDFTemplateGenerator {
 		protected Date date;
 
 		protected double value;
+		
+		protected String strValue;
 	}
 
 	protected List<Operation> operations;
 	protected ImageData img;
-
-
-	@Override
-	public void init(InputStream in) throws Exception {
-
-		operations = new ArrayList<ITextNXBankTemplateCreator.Operation>();
-
+	
+	protected void initOperations() {
+		
 		for (int i = 1; i < 15; i++) {
 			Operation op = new Operation();
 
@@ -74,8 +74,24 @@ public class ITextNXBankTemplateCreator implements PDFTemplateGenerator {
 
 			op.value = Math.random() * 10000 - 5000;
 			operations.add(op);
-		}
+		}		
+	}
 
+	@Override
+	public String[] getKeys() {
+		return _keys;
+	}
+
+	protected String key(int idx) {
+		return getKeys()[idx];
+	}
+	
+	@Override
+	public void init(InputStream in) throws Exception {
+
+		operations = new ArrayList<ITextNXBankTemplateCreator.Operation>();
+		initOperations();
+		
 		if (in != null) {
 			img = ImageDataFactory.create(in.readAllBytes());
 		}
@@ -95,12 +111,12 @@ public class ITextNXBankTemplateCreator implements PDFTemplateGenerator {
 		}
 
 		document.add(new Paragraph().setTextAlignment(TextAlignment.LEFT).setMultipliedLeading(1)
-				.add(new Text("\n" + KEYS[0])).setFontSize(14).setBold().add(new Text("\n" + KEYS[1]))
-				.setFontSize(14).setBold().add(new Text("\n" + KEYS[2])).setFontSize(14).setBold()
-				.add(new Text("\n" + KEYS[3])).setFontSize(14).setBold());
+				.add(new Text("\n" + key(0))).setFontSize(14).setBold().add(new Text("\n" + key(1)))
+				.setFontSize(14).setBold().add(new Text("\n" + key(2))).setFontSize(14).setBold()
+				.add(new Text("\n" + key(3))).setFontSize(14).setBold());
 		document.add(new Paragraph().setTextAlignment(TextAlignment.RIGHT).setMultipliedLeading(1)
-				.add(new Text(ACCOUNT_LABEL + KEYS[4])).setFontSize(14).setBold()
-				.add("\n" + KEYS[5]));
+				.add(new Text(ACCOUNT_LABEL + key(4))).setFontSize(14).setBold()
+				.add("\n" + key(5)));
 
 		LineSeparator sep = new LineSeparator(new SolidLine());
 		document.add(sep);
@@ -122,8 +138,14 @@ public class ITextNXBankTemplateCreator implements PDFTemplateGenerator {
 		table.addHeaderCell(createCell("Debit:").setTextAlignment(TextAlignment.CENTER).setBold());
 		table.addHeaderCell(createCell("Credit:").setTextAlignment(TextAlignment.CENTER).setBold());
 
-		double total = 0;
+		printOperation(table);
 
+		return table;
+	}
+
+	protected void printOperation(Table table) {
+
+		double total = 0;
 		for (Operation op : operations) {
 			table.addCell(createCell(new SimpleDateFormat("MMM dd, YYYY").format(op.date)))
 					.setTextAlignment(TextAlignment.LEFT);
@@ -142,10 +164,9 @@ public class ITextNXBankTemplateCreator implements PDFTemplateGenerator {
 		String formattedValue = NumberFormat.getCurrencyInstance(new Locale("en", "US")).format(Math.abs(total));
 		table.addCell(new Cell(1, 3).setBorder(Border.NO_BORDER));
 		table.addCell(createCell(formattedValue)).setTextAlignment(TextAlignment.RIGHT);
-
-		return table;
+		
 	}
-
+	
 	/**
 	 * Creates a cell with specific properties set.
 	 *
