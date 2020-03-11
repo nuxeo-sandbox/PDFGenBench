@@ -12,6 +12,7 @@ public class BenchRandomGen {
 
 	protected static final int NB_CALLS = 250000;
 	protected static final int NB_THREADS = 10;
+		
 	
 	@Test
 	public void testGen() throws Exception {

@@ -36,3 +36,5 @@ addons/nuxeo-shell/
 # NXP-27709: to be removed
 nuxeo-jsf-ui/
 marketplace/
+
+metadata.csv
