@@ -37,11 +37,16 @@ Run the exectable jar:
 
 Current command line options 
 
+    -aws_key <arg>         AWS_ACCESS_KEY_ID
+    -aws_secret <arg>      AWS_SECRET_ACCESS_KEY
+    -aws_session <arg>     AWS_SESSION_TOKEN
     -h,--help              Help
     -m,--template <arg>    Template: 1 or 2 (default)
     -n,--nbThreads <arg>   Number of PDF to generate
-    -o,--output <arg>      output: mem(default), tmp, file:<path>, s3:<url>
+    -o,--output <arg>      output: mem(default), tmp, file:<path>, s3:<bucketName>
     -t,--threads <arg>     Number of threads
+
+NB: `AWS_ACCESS_KEY_ID`, `AWS_SECRET_ACCESS_KEY` and `AWS_SESSION_TOKEN` can also be set as environment variables.
 
 ### Meta-data collections and logs
 

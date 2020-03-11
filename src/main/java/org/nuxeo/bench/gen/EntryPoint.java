@@ -24,6 +24,7 @@ import org.nuxeo.bench.gen.itext.ITextNXBankStatementGenerator;
 import org.nuxeo.bench.gen.itext.ITextNXBankTemplateCreator;
 import org.nuxeo.bench.gen.itext.ITextNXBankTemplateCreator2;
 import org.nuxeo.bench.gen.out.FolderWriter;
+import org.nuxeo.bench.gen.out.S3Writer;
 import org.nuxeo.bench.gen.out.TmpWriter;
 import org.nuxeo.bench.rnd.RandomDataGenerator;
 
@@ -31,8 +32,8 @@ public class EntryPoint {
 
 	protected static LoggerContext initLogger() {
 		ConfigurationBuilder<BuiltConfiguration> builder = ConfigurationBuilderFactory.newConfigurationBuilder();
-		
-		AppenderComponentBuilder console = builder.newAppender("stdout", "Console");		
+
+		AppenderComponentBuilder console = builder.newAppender("stdout", "Console");
 		builder.add(console);
 
 		AppenderComponentBuilder file1 = builder.newAppender("metadata", "File");
@@ -45,16 +46,16 @@ public class EntryPoint {
 
 		// Use Async Logger
 		RootLoggerComponentBuilder rootLogger = builder.newAsyncRootLogger(Level.INFO);
-		//rootLogger.add(builder.newAppenderRef("stdout"));
-		//rootLogger.add(builder.newAppenderRef("log"));		
+		// rootLogger.add(builder.newAppenderRef("stdout"));
+		// rootLogger.add(builder.newAppenderRef("log"));
 		builder.add(rootLogger);
-						
+
 		// Use Async Logger
 		LoggerComponentBuilder logger1 = builder.newAsyncLogger("metadataLogger", Level.DEBUG);
 		logger1.add(builder.newAppenderRef("metadata"));
 		logger1.addAttribute("additivity", false);
 		builder.add(logger1);
-		
+
 		// Use Async Logger
 		LoggerComponentBuilder logger2 = builder.newAsyncLogger("importLogger", Level.DEBUG);
 		logger2.add(builder.newAppenderRef("injector"));
@@ -67,17 +68,20 @@ public class EntryPoint {
 	public static void main(String[] args) {
 
 		LoggerContext ctx = initLogger();
-				
-		Logger importLogger = ctx.getLogger("importLogger");		
-		Logger metadataLogger = ctx.getLogger("metadataLogger");		
+
+		Logger importLogger = ctx.getLogger("importLogger");
+		Logger metadataLogger = ctx.getLogger("metadataLogger");
 
 		Options options = new Options();
 		options.addOption("t", "threads", true, "Number of threads");
 		options.addOption("n", "nbThreads", true, "Number of PDF to generate");
 		options.addOption("m", "template", true, "Template: 1 or 2 (default)");
-		options.addOption("o", "output", true, "output: mem(default), tmp, file:<path>, s3:<url>");
+		options.addOption("o", "output", true, "output: mem(default), tmp, file:<path>, s3:<bucketName>");
 		options.addOption("h", "help", false, "Help");
-		
+		options.addOption("aws_key", true, "AWS_ACCESS_KEY_ID");
+		options.addOption("aws_secret", true, "AWS_SECRET_ACCESS_KEY");
+		options.addOption("aws_session", true, "AWS_SESSION_TOKEN");
+
 		CommandLineParser parser = new DefaultParser();
 
 		CommandLine cmd = null;
@@ -90,24 +94,32 @@ public class EntryPoint {
 		int nbThreads = Integer.parseInt(cmd.getOptionValue('t', "10"));
 		int nbPdfs = Integer.parseInt(cmd.getOptionValue('n', "100000"));
 		int template = Integer.parseInt(cmd.getOptionValue('m', "2"));
-		
+
 		String out = cmd.getOptionValue('o', "mem");
 		BlobWriter writer = null;
 		if (TmpWriter.NAME.equalsIgnoreCase(out)) {
 			importLogger.log(Level.INFO, "Inititialize Tmp Writer");
 			writer = new TmpWriter();
-		} if (out.startsWith(FolderWriter.NAME)) {
-			String folder = out.substring(FolderWriter.NAME.length());
+		} else if (out.startsWith(FolderWriter.NAME)) {
+			String folder = out.substring(FolderWriter.NAME.length() + 1);
 			importLogger.log(Level.INFO, "Inititialize Folder Writer in " + folder);
 			writer = new FolderWriter(folder);
+		} else if (out.startsWith(S3Writer.NAME)) {
+			String bucketName = out.substring(S3Writer.NAME.length() + 1);
+			importLogger.log(Level.INFO, "Inititialize S3 Writer in bucket " + bucketName);
+
+			String aws_key = cmd.getOptionValue("aws_key", null);
+			String aws_secret = cmd.getOptionValue("aws_secret", null);
+			String aws_session = cmd.getOptionValue("aws_session", null);
+			writer = new S3Writer(bucketName, aws_key, aws_secret, aws_session);
 		}
-		
+
 		if (cmd.hasOption('h')) {
-			 HelpFormatter formatter = new HelpFormatter();
-		     formatter.printHelp("PDFGenerator", options);
-		     return;
+			HelpFormatter formatter = new HelpFormatter();
+			formatter.printHelp("PDFGenerator", options);
+			return;
 		}
-		
+
 		importLogger.log(Level.INFO, "Init Injector");
 		importLogger.log(Level.INFO, "  Threads:" + nbThreads);
 		importLogger.log(Level.INFO, "  pdfs:" + nbPdfs);
@@ -120,20 +132,21 @@ public class EntryPoint {
 		}
 	}
 
-	protected static void runInjector(int total, int threads, int template, Logger importLogger, Logger metadataLogger, BlobWriter writer) throws Exception {
+	protected static void runInjector(int total, int threads, int template, Logger importLogger, Logger metadataLogger,
+			BlobWriter writer) throws Exception {
 
 		// Data Generator
 		RandomDataGenerator rnd = null;
 		ITextNXBankTemplateCreator templateGen = null;
-		
+
 		importLogger.log(Level.INFO, "using template " + template);
-		
-		if (template==1) {
+
+		if (template == 1) {
 			rnd = new RandomDataGenerator(false);
 			templateGen = new ITextNXBankTemplateCreator();
 		} else {
 			rnd = new RandomDataGenerator(true);
-			templateGen= new ITextNXBankTemplateCreator2();
+			templateGen = new ITextNXBankTemplateCreator2();
 		}
 
 		// init random data generator
@@ -155,9 +168,9 @@ public class EntryPoint {
 		gen.setRndGenerator(rnd);
 
 		Injector injector = new Injector(gen, total, threads, importLogger, metadataLogger);
-		
+
 		injector.setWriter(writer);
-		
+
 		injector.run();
 
 	}
