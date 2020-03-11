@@ -13,7 +13,7 @@ import org.nuxeo.bench.rnd.RandomDataGenerator;
 
 public class TestInjector {
 
-	public static final int NB_DOC = 500000;
+	public static final int NB_DOC = 100000;
 	
 	@Test
 	public void testInjector() throws Exception {

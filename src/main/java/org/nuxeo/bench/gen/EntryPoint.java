@@ -35,22 +35,31 @@ public class EntryPoint {
 		AppenderComponentBuilder console = builder.newAppender("stdout", "Console");		
 		builder.add(console);
 
-		AppenderComponentBuilder file = builder.newAppender("log", "File");
-		file.addAttribute("fileName", "injector.log");
-		builder.add(file);
+		AppenderComponentBuilder file1 = builder.newAppender("metadata", "File");
+		file1.addAttribute("fileName", "metadata.csv");
+		builder.add(file1);
+
+		AppenderComponentBuilder file2 = builder.newAppender("injector", "File");
+		file2.addAttribute("fileName", "injector.log");
+		builder.add(file2);
 
 		// Use Async Logger
 		RootLoggerComponentBuilder rootLogger = builder.newAsyncRootLogger(Level.INFO);
-		rootLogger.add(builder.newAppenderRef("stdout"));
-		rootLogger.add(builder.newAppenderRef("log"));		
+		//rootLogger.add(builder.newAppenderRef("stdout"));
+		//rootLogger.add(builder.newAppenderRef("log"));		
 		builder.add(rootLogger);
 						
-		//
-		LoggerComponentBuilder logger = builder.newAsyncLogger("import", Level.DEBUG);
-		logger.add(builder.newAppenderRef("log"));
-		logger.addAttribute("additivity", false);
-
-		builder.add(logger);
+		// Use Async Logger
+		LoggerComponentBuilder logger1 = builder.newAsyncLogger("metadataLogger", Level.DEBUG);
+		logger1.add(builder.newAppenderRef("metadata"));
+		logger1.addAttribute("additivity", false);
+		builder.add(logger1);
+		
+		// Use Async Logger
+		LoggerComponentBuilder logger2 = builder.newAsyncLogger("importLogger", Level.DEBUG);
+		logger2.add(builder.newAppenderRef("injector"));
+		logger2.addAttribute("additivity", false);
+		builder.add(logger2);
 
 		return Configurator.initialize(builder.build());
 	}
@@ -59,8 +68,8 @@ public class EntryPoint {
 
 		LoggerContext ctx = initLogger();
 				
-		Logger rootLogger = ctx.getRootLogger();		
-		Logger logger = ctx.getLogger("import");		
+		Logger importLogger = ctx.getLogger("importLogger");		
+		Logger metadataLogger = ctx.getLogger("metadataLogger");		
 
 		Options options = new Options();
 		options.addOption("t", "threads", true, "Number of threads");
@@ -85,11 +94,11 @@ public class EntryPoint {
 		String out = cmd.getOptionValue('o', "mem");
 		BlobWriter writer = null;
 		if (TmpWriter.NAME.equalsIgnoreCase(out)) {
-			rootLogger.log(Level.INFO, "Inititialize Tmp Writer");
+			importLogger.log(Level.INFO, "Inititialize Tmp Writer");
 			writer = new TmpWriter();
 		} if (out.startsWith(FolderWriter.NAME)) {
 			String folder = out.substring(FolderWriter.NAME.length());
-			rootLogger.log(Level.INFO, "Inititialize Folder Writer in " + folder);
+			importLogger.log(Level.INFO, "Inititialize Folder Writer in " + folder);
 			writer = new FolderWriter(folder);
 		}
 		
@@ -99,25 +108,25 @@ public class EntryPoint {
 		     return;
 		}
 		
-		rootLogger.log(Level.INFO, "Init Injector");
-		rootLogger.log(Level.INFO, "  Threads:" + nbThreads);
-		rootLogger.log(Level.INFO, "  pdfs:" + nbPdfs);
+		importLogger.log(Level.INFO, "Init Injector");
+		importLogger.log(Level.INFO, "  Threads:" + nbThreads);
+		importLogger.log(Level.INFO, "  pdfs:" + nbPdfs);
 
 		try {
-			runInjector(nbPdfs, nbThreads, template, rootLogger, logger, writer);
+			runInjector(nbPdfs, nbThreads, template, importLogger, metadataLogger, writer);
 		} catch (Exception e) {
 			System.err.println("Error while running Injector " + e);
 			e.printStackTrace();
 		}
 	}
 
-	protected static void runInjector(int total, int threads, int template, Logger rootLogger, Logger logger, BlobWriter writer) throws Exception {
+	protected static void runInjector(int total, int threads, int template, Logger importLogger, Logger metadataLogger, BlobWriter writer) throws Exception {
 
 		// Data Generator
 		RandomDataGenerator rnd = null;
 		ITextNXBankTemplateCreator templateGen = null;
 		
-		rootLogger.log(Level.INFO, "using template " + template);
+		importLogger.log(Level.INFO, "using template " + template);
 		
 		if (template==1) {
 			rnd = new RandomDataGenerator(false);
@@ -145,7 +154,7 @@ public class EntryPoint {
 		gen.computeDigest = true;
 		gen.setRndGenerator(rnd);
 
-		Injector injector = new Injector(gen, total, threads, rootLogger, logger);
+		Injector injector = new Injector(gen, total, threads, importLogger, metadataLogger);
 		
 		injector.setWriter(writer);
 		

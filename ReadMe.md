@@ -43,7 +43,16 @@ Current command line options
     -o,--output <arg>      output: mem(default), tmp, file:<path>, s3:<url>
     -t,--threads <arg>     Number of threads
 
-The full log of generate meta-data is available inside the `injectior.log`.
+### Meta-data collections and logs
+
+By *"MetaData collection"* we mean: persisting the data that were used to generate each PDF file
+
+ - the metadata 
+ - the digest (or BlobKey) for the pdf file 
+
+The file `metadata.csv` is used to store these informations.
+
+The file `injector.log` contains the log of the steps of the import.
 
 ### Example execution
 

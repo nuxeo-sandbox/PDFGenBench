@@ -23,20 +23,20 @@ public class Injector {
 	protected BlobWriter writer;
 	
 
-	protected Logger rootLogger;
-	protected Logger logger;
+	protected Logger importLogger;
+	protected Logger metadataLogger;
 
 	public Injector(PDFFileGenerator gen, int total) {
 		this(gen, total, 10, null, null);
 	}
 
-	public Injector(PDFFileGenerator gen, int total, int nbThreads, Logger rootLogger, Logger logger) {
+	public Injector(PDFFileGenerator gen, int total, int nbThreads, Logger importLogger, Logger metadataLogger) {
 		this.gen = gen;
 		this.total = total;
 		this.NB_THREADS = nbThreads;
 		this.callsPerThreads = Math.round(total / NB_THREADS) + 1;
-		this.logger = logger;
-		this.rootLogger = rootLogger;
+		this.metadataLogger = metadataLogger;
+		this.importLogger = importLogger;
 	}
 
 	public BlobWriter getWriter() {
@@ -48,22 +48,26 @@ public class Injector {
 	}	
 	
 	protected void log(String message) {
-		if (rootLogger != null) {
-			rootLogger.log(Level.INFO, message);
+		if (importLogger != null) {
+			importLogger.log(Level.INFO, message);
 		} else {
 			System.out.println(message);
 		}
 	}
 
-	protected void log (SmtMeta meta) {
-		if (logger!=null) {
+	protected void collect (SmtMeta meta) {
+		if (metadataLogger!=null) {
 			StringBuffer sb = new StringBuffer();
 			sb.append(meta.getDigest());
+			sb.append(",");
+			sb.append(meta.getFileName());
+			sb.append(",");
+			sb.append(meta.getFileSize());
 			for (String key: meta.getKeys()) {
 				sb.append(",");
 				sb.append(key);
 			}			
-			logger.log(Level.DEBUG,sb.toString());
+			metadataLogger.log(Level.DEBUG,sb.toString());
 		}
 	}
 	
@@ -90,7 +94,7 @@ public class Injector {
 						if (writer!=null) {
 							writer.write(buffer.toByteArray(), meta.getDigest());
 						}
-						log(meta);
+						collect(meta);
 						counter.incrementAndGet();
 					} catch (Exception e) {
 						e.printStackTrace();

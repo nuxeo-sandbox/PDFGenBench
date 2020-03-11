@@ -8,6 +8,7 @@ import java.security.MessageDigest;
 import java.util.HashMap;
 import java.util.Map;
 
+import org.apache.commons.io.output.CountingOutputStream;
 import org.nuxeo.bench.gen.PDFFileGenerator;
 import org.nuxeo.bench.gen.smt.SmtMeta;
 import org.nuxeo.bench.rnd.RandomDataGenerator;
@@ -76,7 +77,10 @@ public class ITextNXBankStatementGenerator implements PDFFileGenerator {
 	public SmtMeta generate(OutputStream buffer) throws Exception {
 
 		DigestOutputStream db = null;
-
+		
+		CountingOutputStream cout = null;
+		
+		
 		String[] tokens = rndGen.generate();
 		PdfReader pdfReader = new PdfReader(new ByteArrayInputStream(template));
 
@@ -85,12 +89,13 @@ public class ITextNXBankStatementGenerator implements PDFFileGenerator {
 		wp.useSmartMode();
 
 		PdfWriter writer;
-		if (computeDigest) {
+		if (computeDigest) {			
 			db = new DigestOutputStream(buffer, MessageDigest.getInstance("MD5"));
-			writer = new PdfWriter(db, wp);
+			cout = new CountingOutputStream(db);			
 		} else {
-			writer = new PdfWriter(buffer, wp);
+			cout = new CountingOutputStream(buffer);
 		}
+		writer = new PdfWriter(cout, wp);
 
 		PdfDocument doc = new HackedPDFDocument(pdfReader, writer);
 
@@ -109,15 +114,18 @@ public class ITextNXBankStatementGenerator implements PDFFileGenerator {
 			stream.setData(data);
 		}
 		doc.close();
-
+		writer.flush();
+		writer.close();
+		
+		String fileName = "stmt-"+tokens[5].trim() + ".pdf";
+		long fileSize = cout.getByteCount();
+		String md5 = "n/a";
+		
 		if (db != null) {
 			byte[] digest = db.getMessageDigest().digest();
-			String md5 = toHexString(digest).toUpperCase();
-
-			return new SmtMeta(md5, tokens);
+			md5 = toHexString(digest).toUpperCase();
 		}
-
-		return new SmtMeta(null, tokens);
+		return new SmtMeta(md5, fileName, fileSize, tokens);
 	}
 
 	protected static String toHexString(byte[] bytes) {
