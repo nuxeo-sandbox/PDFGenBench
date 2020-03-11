@@ -19,7 +19,7 @@ import com.amazonaws.services.s3.model.PutObjectResult;
 
 public class S3Writer implements BlobWriter {
 
-	public static final String NAME= "s3";
+	public static final String NAME= "s3:";
 	
 	protected String bucketName;
 	
@@ -78,4 +78,9 @@ public class S3Writer implements BlobWriter {
 		PutObjectResult res = s3.putObject(put);
 	}
 	
+	@Override
+	public void flush() {
+		// NOP
+	}
+
 }

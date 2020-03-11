@@ -17,4 +17,9 @@ public class TmpWriter implements BlobWriter {
 		Files.copy(new ByteArrayInputStream(data), tmp.toPath(),StandardCopyOption.REPLACE_EXISTING);	
 	}
 	
+	@Override
+	public void flush() {
+		// NOP
+	}
+	
 }

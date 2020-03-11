@@ -24,9 +24,13 @@ import org.nuxeo.bench.gen.itext.ITextNXBankStatementGenerator;
 import org.nuxeo.bench.gen.itext.ITextNXBankTemplateCreator;
 import org.nuxeo.bench.gen.itext.ITextNXBankTemplateCreator2;
 import org.nuxeo.bench.gen.out.FolderWriter;
+import org.nuxeo.bench.gen.out.S3TMAWriter;
+import org.nuxeo.bench.gen.out.S3TMWriter;
 import org.nuxeo.bench.gen.out.S3Writer;
 import org.nuxeo.bench.gen.out.TmpWriter;
 import org.nuxeo.bench.rnd.RandomDataGenerator;
+
+import com.amazonaws.services.s3.S3ResponseMetadata;
 
 public class EntryPoint {
 
@@ -76,7 +80,7 @@ public class EntryPoint {
 		options.addOption("t", "threads", true, "Number of threads");
 		options.addOption("n", "nbThreads", true, "Number of PDF to generate");
 		options.addOption("m", "template", true, "Template: 1 or 2 (default)");
-		options.addOption("o", "output", true, "output: mem(default), tmp, file:<path>, s3:<bucketName>");
+		options.addOption("o", "output", true, "output: mem(default), tmp, file:<path>, s3:<bucketName>, s3tm:<bucketName>, s3tma:<bucketName>");
 		options.addOption("h", "help", false, "Help");
 		options.addOption("aws_key", true, "AWS_ACCESS_KEY_ID");
 		options.addOption("aws_secret", true, "AWS_SECRET_ACCESS_KEY");
@@ -101,17 +105,33 @@ public class EntryPoint {
 			importLogger.log(Level.INFO, "Inititialize Tmp Writer");
 			writer = new TmpWriter();
 		} else if (out.startsWith(FolderWriter.NAME)) {
-			String folder = out.substring(FolderWriter.NAME.length() + 1);
+			String folder = out.substring(FolderWriter.NAME.length() );
 			importLogger.log(Level.INFO, "Inititialize Folder Writer in " + folder);
 			writer = new FolderWriter(folder);
 		} else if (out.startsWith(S3Writer.NAME)) {
-			String bucketName = out.substring(S3Writer.NAME.length() + 1);
+			String bucketName = out.substring(S3Writer.NAME.length() );
 			importLogger.log(Level.INFO, "Inititialize S3 Writer in bucket " + bucketName);
 
 			String aws_key = cmd.getOptionValue("aws_key", null);
 			String aws_secret = cmd.getOptionValue("aws_secret", null);
 			String aws_session = cmd.getOptionValue("aws_session", null);
 			writer = new S3Writer(bucketName, aws_key, aws_secret, aws_session);
+		} else if (out.startsWith(S3TMWriter.NAME)) {
+			String bucketName = out.substring(S3TMWriter.NAME.length());
+			importLogger.log(Level.INFO, "Inititialize S3TM Writer in bucket " + bucketName);
+
+			String aws_key = cmd.getOptionValue("aws_key", null);
+			String aws_secret = cmd.getOptionValue("aws_secret", null);
+			String aws_session = cmd.getOptionValue("aws_session", null);
+			writer = new S3TMWriter(bucketName, aws_key, aws_secret, aws_session);
+		} else if (out.startsWith(S3TMAWriter.NAME)) {
+			String bucketName = out.substring(S3TMAWriter.NAME.length());
+			importLogger.log(Level.INFO, "Inititialize S3TMA Writer in bucket " + bucketName);
+
+			String aws_key = cmd.getOptionValue("aws_key", null);
+			String aws_secret = cmd.getOptionValue("aws_secret", null);
+			String aws_session = cmd.getOptionValue("aws_session", null);
+			writer = new S3TMAWriter(bucketName, aws_key, aws_secret, aws_session);
 		}
 
 		if (cmd.hasOption('h')) {

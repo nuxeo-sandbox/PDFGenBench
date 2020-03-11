@@ -10,7 +10,7 @@ import org.nuxeo.bench.gen.BlobWriter;
 
 public class FolderWriter implements BlobWriter {
 
-	public static final String NAME= "file";
+	public static final String NAME= "file:";
 	
 	protected File folder;
 	
@@ -24,4 +24,8 @@ public class FolderWriter implements BlobWriter {
 		Files.copy(new ByteArrayInputStream(data), path,StandardCopyOption.REPLACE_EXISTING);		
 	}
 	
+	@Override
+	public void flush() {
+		// NOP
+	}
 }

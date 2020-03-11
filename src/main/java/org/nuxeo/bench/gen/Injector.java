@@ -13,7 +13,7 @@ import org.nuxeo.bench.gen.smt.SmtMeta;
 
 public class Injector {
 
-	protected int NB_THREADS = 10;
+	protected int nbThreads = 10;
 	protected static final int BUFFER_SIZE = 10 * 1024;
 
 	protected static final int MAX_PAUSE = 60 * 5;
@@ -34,8 +34,8 @@ public class Injector {
 	public Injector(PDFFileGenerator gen, int total, int nbThreads, Logger importLogger, Logger metadataLogger) {
 		this.gen = gen;
 		this.total = total;
-		this.NB_THREADS = nbThreads;
-		this.callsPerThreads = Math.round(total / NB_THREADS) + 1;
+		this.nbThreads = nbThreads;
+		this.callsPerThreads = Math.round(total / nbThreads) + 1;
 		this.metadataLogger = metadataLogger;
 		this.importLogger = importLogger;
 	}
@@ -86,7 +86,7 @@ public class Injector {
 
 	public int run() throws Exception {
 
-		ThreadPoolExecutor executor = (ThreadPoolExecutor) Executors.newFixedThreadPool(10);
+		ThreadPoolExecutor executor = (ThreadPoolExecutor) Executors.newFixedThreadPool(nbThreads);
 		executor.prestartAllCoreThreads();
 		AtomicInteger counter = new AtomicInteger();
 		AtomicInteger genSize = new AtomicInteger();
@@ -106,6 +106,9 @@ public class Injector {
 						SmtMeta meta = gen.generate(buffer);
 						if (writer != null) {
 							writer.write(buffer.toByteArray(), meta.getDigest());
+							//if (i%100==0) {
+							//	writer.flush();
+							//}
 						}
 						collect(meta);
 						counter.incrementAndGet();
@@ -113,10 +116,11 @@ public class Injector {
 						e.printStackTrace();
 					}
 				}
+				writer.flush();
 			}
 		}
 
-		for (int i = 0; i < NB_THREADS; i++) {
+		for (int i = 0; i < nbThreads; i++) {
 			executor.execute(new Task());
 		}
 

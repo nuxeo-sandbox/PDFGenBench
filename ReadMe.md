@@ -43,8 +43,19 @@ Current command line options
     -h,--help              Help
     -m,--template <arg>    Template: 1 or 2 (default)
     -n,--nbThreads <arg>   Number of PDF to generate
-    -o,--output <arg>      output: mem(default), tmp, file:<path>, s3:<bucketName>
+    -o,--output <arg>      output: mem(default), tmp, file:<path>,
+                           s3:<bucketName>, s3tm:<bucketName>,
+                           s3tma:<bucketName>
     -t,--threads <arg>     Number of threads
+
+Output options are:
+
+ - `mem`: generate the PDFs purely in memory (no network or disk IO)
+ - `tmp`: store the PDFs in a java temporary file
+ - `file`: store the PDFs in the directory passed 
+ - `s3`: store the PDFs in S3 using the std PUTObject API
+ - `s3tm`: store the PDFs in S3 using the TransferManager
+ - `s3tma`: store the PDFs in S3 using the TransferManager asynchronous API
 
 NB: `AWS_ACCESS_KEY_ID`, `AWS_SECRET_ACCESS_KEY` and `AWS_SESSION_TOKEN` can also be set as environment variables.
 
