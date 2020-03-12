@@ -47,12 +47,16 @@ public class S3Writer implements BlobWriter {
 		
 		ClientConfiguration clientConfiguration = new ClientConfiguration();
 		String region = new DefaultAwsRegionProviderChain().getRegion();
-
 		
+		clientConfiguration.setMaxConnections(500);
+		clientConfiguration.setUseGzip(false);
+		clientConfiguration.setUseTcpKeepAlive(true);
+
 		AmazonS3ClientBuilder s3Builder = AmazonS3ClientBuilder.standard()
                 .withCredentials(credProvider)
                 .withClientConfiguration(clientConfiguration)
                 .withRegion(region);
+		
 		s3 = s3Builder.build();
 		
 	}

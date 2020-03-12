@@ -26,7 +26,7 @@ public class S3TMWriter extends S3Writer {
             String sessionToken) {
 		super(bucketName,accessKeyId, secretKey, sessionToken);
 		
-		tm = TransferManagerBuilder.standard().withMultipartUploadThreshold(1024L*1024)
+		tm = TransferManagerBuilder.standard().withMultipartUploadThreshold(1024L*1024)				
                  .withS3Client(s3)
 //                 .withExecutorFactory(executorFactory)
                  .build();			
