@@ -14,7 +14,7 @@ import java.util.concurrent.atomic.AtomicInteger;
 import org.apache.commons.io.FileUtils;
 import org.nuxeo.bench.gen.BlobWriter;
 
-public abstract class FolderBatchWriter implements BlobWriter {
+public abstract class AbstractFolderBatchWriter implements BlobWriter {
 
 	public static final String NAME = "file:";
 
@@ -28,7 +28,7 @@ public abstract class FolderBatchWriter implements BlobWriter {
 	
 	protected ThreadPoolExecutor completionExecutor = (ThreadPoolExecutor) Executors.newFixedThreadPool(1);
 	
-	public FolderBatchWriter(String folder, int batchSize, int total) {
+	public AbstractFolderBatchWriter(String folder, int batchSize, int total) {
 		this.rootFolder = new File(folder);
 		this.batchSize = batchSize;
 		counter = new AtomicInteger(0);

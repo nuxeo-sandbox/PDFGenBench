@@ -11,7 +11,7 @@ import java.util.concurrent.atomic.AtomicInteger;
 
 import org.apache.commons.io.FileUtils;
 import org.junit.Test;
-import org.nuxeo.bench.gen.out.FolderBatchWriter;
+import org.nuxeo.bench.gen.out.AbstractFolderBatchWriter;
 
 public class TestBatchFolders {
 
@@ -19,7 +19,7 @@ public class TestBatchFolders {
 	protected static final int NB_THREADS = 50;		
 	protected static final int BATCH_SIZE = 25;
 	
-	protected class TestFolderBatchWriter extends FolderBatchWriter {
+	protected class TestFolderBatchWriter extends AbstractFolderBatchWriter {
 
 		AtomicInteger deleteCounter;
 		
