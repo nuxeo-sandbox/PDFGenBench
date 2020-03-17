@@ -1,57 +1,31 @@
 import static org.junit.Assert.assertEquals;
 
-import java.io.File;
-import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.util.List;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
 
-import org.apache.commons.io.FileUtils;
 import org.junit.Test;
-import org.nuxeo.bench.gen.out.AbstractFolderBatchWriter;
+import org.nuxeo.bench.gen.out.FolderBatchWriterWithCmdCB;
 
-public class TestBatchFolders {
+public class TestBatchFoldersCB {
 
-	protected static final int NB_CALLS = 162437;
-	protected static final int NB_THREADS = 50;		
+	protected static final int NB_CALLS = 5000;
+	protected static final int NB_THREADS = 10;		
 	protected static final int BATCH_SIZE = 25;
 	
-	protected class TestFolderBatchWriter extends AbstractFolderBatchWriter {
-
-		AtomicInteger deleteCounter;
-		
-		public TestFolderBatchWriter(String folder, int batchSize, int total) {
-			super(folder, batchSize, total);
-			deleteCounter = new AtomicInteger(0);			
-		}
-
-		protected void batchCompledtedCB(int batch, String path) {
-			File directory = new File(path);			
-			String[] items = directory.list();
-			
-			if (items==null) {
-				System.out.println("NO Items!!!!");
-			}
-			deleteCounter.addAndGet(items.length);
-			
-			try {
-				FileUtils.deleteDirectory(directory);
-			} catch (IOException e) {
-				e.printStackTrace();
-			}
-		}
-	}
+	protected static final String[] cmd = {"bash", "-c", "ls -l %dir% | wc -l"};
 	
 	@Test
-	public void testBatchFolder() throws Exception {
+	public void testBatchFolderCB() throws Exception {
 
 		Path folder = Files.createTempDirectory("S3Batch");
 		System.out.println("Running tests in:" + folder.toString());
 		
-		TestFolderBatchWriter fbw = new TestFolderBatchWriter(folder.toString(), BATCH_SIZE, NB_CALLS);
+		FolderBatchWriterWithCmdCB fbw = new FolderBatchWriterWithCmdCB(folder.toString(), BATCH_SIZE, NB_CALLS, cmd);
 		
 		ThreadPoolExecutor executor = (ThreadPoolExecutor) Executors.newFixedThreadPool(10);
 		executor.prestartAllCoreThreads();
@@ -104,8 +78,14 @@ public class TestBatchFolders {
 		// check executed writes
 		System.out.println("Executed Calls:" + counter.get());
 		assertEquals(NB_CALLS,  counter.get());		
-		System.out.println("Processed files :" + fbw.deleteCounter.get());
-		assertEquals(NB_CALLS, fbw.deleteCounter.get());
+		
+		List<String> out = fbw.getStdOut();
+		int linesCounter = 0;
+		for (String line : out) {
+			linesCounter+= Integer.parseInt(line);
+		}
+		assertEquals(NB_CALLS,  linesCounter);			
+		//System.out.print(Arrays.toString(out.toArray()));
 		
 	}
 
