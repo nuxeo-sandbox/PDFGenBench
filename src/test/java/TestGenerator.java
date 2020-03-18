@@ -1,5 +1,6 @@
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNotEquals;
 import static org.junit.Assert.assertTrue;
 
 import java.io.ByteArrayInputStream;
@@ -7,9 +8,9 @@ import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileInputStream;
 import java.net.URL;
-import java.nio.file.CopyOption;
 import java.nio.file.Files;
 import java.nio.file.StandardCopyOption;
+import java.util.List;
 
 import org.apache.pdfbox.pdmodel.PDDocument;
 import org.apache.pdfbox.util.PDFTextStripper;
@@ -43,6 +44,35 @@ public class TestGenerator {
 	}
 	
 
+	@Test
+	public void testGenerateSerie() throws Exception {
+		RandomDataGenerator rnd = getRndGenerator(true);
+		
+		List<String[]> serie = rnd.generateSerie(24);
+		String m ="";
+		for (String[] data : serie) {
+			
+			assertEquals(serie.get(0)[0], data[0]);
+			assertEquals(data[5].trim().substring(0,3), data[6].trim());			
+			assertNotEquals(m, data[6].trim());
+			m = data[6].trim();
+
+			StringBuffer sb = new StringBuffer();
+			
+			sb.append(data[0]);
+			sb.append(" -- ");
+			sb.append(data[5]);
+			sb.append(" -- ");
+			sb.append(data[6]);
+			sb.append(" -- ");
+			sb.append(data[8]);			
+			
+			//System.out.println(sb.toString());
+			
+		}
+	}
+	
+	
 	@Test
 	public void canGenerateRandomData() throws Exception {
 

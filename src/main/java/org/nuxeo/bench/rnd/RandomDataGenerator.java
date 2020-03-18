@@ -11,6 +11,8 @@ import java.text.SimpleDateFormat;
 import java.time.Instant;
 import java.util.ArrayList;
 import java.util.Date;
+import java.util.GregorianCalendar;
+import java.util.List;
 import java.util.Locale;
 
 public class RandomDataGenerator {
@@ -96,6 +98,31 @@ public class RandomDataGenerator {
 		return result;
 	}
 
+	public List<String[]> generateSerie(int length) {
+		
+		List<String[]> serie = new ArrayList<String[]>();
+		
+		String[] userInfo = new String [6];
+		fillUserInfo(userInfo);
+		
+		for (int dm = 0; dm < length; dm++) {
+			
+			String[] data = new String [6+14*2 + 1+1+1];			
+			System.arraycopy(userInfo, 0, data, 0, 6);
+						
+			int dy = dm/12;
+			int m = dm - dy*12;
+
+			Date date = new GregorianCalendar(2020-dy, m, 01).getTime();
+			data[5] = pad(df.format(date), 20, false);
+
+			fillOperations(data);			
+			serie.add(data);
+		}
+		
+		return serie;
+	}
+	
 	protected void fillUserInfo(String[] result) {
 
 		result[0] = firstNames.get((int) Math.round(Math.random() * (firstNames.size() - 1))) + " "
