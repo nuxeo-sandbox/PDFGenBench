@@ -82,7 +82,7 @@ public class RandomDataGenerator {
 		String[] result=null;
 		
 		if (generateOperations) {
-			result = new String [6+14*2 + 1+1];
+			result = new String [6+14*2 + 1+1+1];
 		} else {
 			result = new String [6];
 		}
@@ -113,11 +113,10 @@ public class RandomDataGenerator {
 		result[0] = result[0] + " ".repeat(41 - result[0].length());
 
 		for (int i = 1; i < 4; i++) {
-			result[i] = result[i] + " ".repeat(20 - result[i].length());
+			result[i] = pad(result[i], 20, true);
 		}
-		result[4] = " ".repeat(20 - result[4].length()) + result[4];
-		result[5] = " ".repeat(20 - result[5].length()) + result[5];
-
+		result[4] = pad(result[4], 20, false);
+		result[5] = pad(result[5], 20, false);
 	}
 
 	
@@ -143,6 +142,11 @@ public class RandomDataGenerator {
 	
 	protected void fillOperations(String[] result) {
 		int idx = 6;
+
+		// init month from the same date as the statement!
+		result[idx]=pad(result[5].trim().substring(0,3), 5, false);
+		idx++;
+				
 		double total = getRandomAmount()*30;
 		result[idx] = getFormatedRandomAmount(total, 12);
 		idx++;

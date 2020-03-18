@@ -24,6 +24,8 @@ public class ITextNXBankTemplateCreator2 extends ITextNXBankTemplateCreator impl
 			keys.add(k);
 		}
 		
+		keys.add(mkTag("MON", 5));
+		
 		Operation obb = new Operation();
 		obb.label="Beginning Balance";
 		Calendar cal = new GregorianCalendar(2020, 0, 1);
@@ -51,7 +53,8 @@ public class ITextNXBankTemplateCreator2 extends ITextNXBankTemplateCreator impl
 			operations.add(op);
 		}
 		
-		keys.add(mkTag("Total",12));		
+		keys.add(mkTag("Total",12));	
+		
 	}
 
 	@Override
@@ -63,7 +66,7 @@ public class ITextNXBankTemplateCreator2 extends ITextNXBankTemplateCreator impl
 	protected void printOperation(Table table) {
 
 		for (Operation op : operations) {
-			table.addCell(createCell(new SimpleDateFormat("MMM dd").format(op.date)))
+			table.addCell(createCell("#MON#" +new SimpleDateFormat(" dd").format(op.date)))
 					.setTextAlignment(TextAlignment.LEFT);
 			table.addCell(createCell(op.label).setTextAlignment(TextAlignment.CENTER));
 
