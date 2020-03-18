@@ -17,7 +17,7 @@ public class TestBatchFoldersCB {
 	protected static final int NB_THREADS = 10;		
 	protected static final int BATCH_SIZE = 25;
 	
-	protected static final String cmd = "ls -l %dir% | wc -l";
+	protected static final String cmd = "ls -l %dir% | grep -v total | wc -l";
 	//protected static final String cmd = "sleep 0.1";
 	
 	@Test
@@ -26,7 +26,7 @@ public class TestBatchFoldersCB {
 		Path folder = Files.createTempDirectory("S3Batch");
 		System.out.println("Running tests in:" + folder.toString());
 		
-		FolderBatchWriterWithCmdCB fbw = new FolderBatchWriterWithCmdCB(folder.toString(), BATCH_SIZE, NB_CALLS, cmd, false);
+		FolderBatchWriterWithCmdCB fbw = new FolderBatchWriterWithCmdCB(folder.toString(), BATCH_SIZE, NB_CALLS, cmd, true);
 		
 		ThreadPoolExecutor executor = (ThreadPoolExecutor) Executors.newFixedThreadPool(10);
 		executor.prestartAllCoreThreads();

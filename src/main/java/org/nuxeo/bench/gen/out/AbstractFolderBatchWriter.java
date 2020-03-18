@@ -2,16 +2,13 @@ package org.nuxeo.bench.gen.out;
 
 import java.io.ByteArrayInputStream;
 import java.io.File;
-import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.nio.file.StandardCopyOption;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
 
-import org.apache.commons.io.FileUtils;
 import org.nuxeo.bench.gen.BlobWriter;
 
 public abstract class AbstractFolderBatchWriter implements BlobWriter {
@@ -23,8 +20,10 @@ public abstract class AbstractFolderBatchWriter implements BlobWriter {
 	protected final int batchSize;
 
 	protected AtomicInteger counter;
+	
+	protected int lastCleanupScheduled=0;
 
-	protected int margin = 0;
+	protected int nbBatches;
 	
 	protected ThreadPoolExecutor completionExecutor = (ThreadPoolExecutor) Executors.newFixedThreadPool(1);
 	
@@ -33,7 +32,6 @@ public abstract class AbstractFolderBatchWriter implements BlobWriter {
 		this.batchSize = batchSize;
 		counter = new AtomicInteger(0);
 		allocateBatchFolder(batchSize, total);
-		margin = batchSize/2;
 		
 		completionExecutor.setCorePoolSize(1);
 		completionExecutor.setMaximumPoolSize(1);
@@ -46,7 +44,7 @@ public abstract class AbstractFolderBatchWriter implements BlobWriter {
 	}
 
 	protected void allocateBatchFolder(int batchSize, int total) {
-		int nbBatches = total / batchSize + 1;
+		nbBatches = total / batchSize + 1;
 
 		for (int i = 1; i <= nbBatches; i++) {
 			String folderName = getFolderName(i);
@@ -67,25 +65,23 @@ public abstract class AbstractFolderBatchWriter implements BlobWriter {
 
 	protected class Batch {
 		int idx;
-		int batchId;
-		
+		int batchId;		
 		public Batch(int idx, int batchId) {
 			this.idx = idx;
 			this.batchId = batchId;
 		}		
 	}
 	
-	protected Batch getCurrentBatchId() {
+	protected Batch getCurrentBatchId() {		
 		int idx = counter.incrementAndGet();
-		int batchId = 1 +  idx / batchSize;		
+		int batchId = 1 +  (idx-1) / batchSize;		
 		return new Batch(idx, batchId);
-	}
-	
-	
-	
+	}		
+		
 	protected void fileCompleted(Batch batch) {		
-		if ((batch.idx > margin) && (batch.idx % batchSize == margin)) {
+		if ((batch.batchId > 1) && (batch.idx % batchSize == 0)) {
 			postProcessBatch(batch.batchId - 1, getBatchFolderPath(batch.batchId-1));
+			lastCleanupScheduled=batch.batchId - 1;
 		}
 	}
 
@@ -104,9 +100,11 @@ public abstract class AbstractFolderBatchWriter implements BlobWriter {
 
 	@Override
 	public void flush() {
-		Batch batch = getCurrentBatchId();
-		postProcessBatch(batch.batchId, getBatchFolderPath(batch.batchId));
-		
+				
+		for (int bid = lastCleanupScheduled+1; bid <= nbBatches; bid++) {
+			postProcessBatch(bid, getBatchFolderPath(bid));	
+		}
+
 		completionExecutor.shutdown();
 		 
 		try {

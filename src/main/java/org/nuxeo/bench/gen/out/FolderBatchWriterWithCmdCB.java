@@ -6,7 +6,6 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.stream.Stream;
 
 import org.apache.commons.io.FileUtils;
 
@@ -33,7 +32,9 @@ public class FolderBatchWriterWithCmdCB extends AbstractFolderBatchWriter {
 	}
 
 	protected String[] getCmd() {
-		return cmd;
+		String[] c = new String[cmd.length];
+		System.arraycopy(cmd, 0, c, 0, cmd.length);
+		return c;
 	}
 
 	public List<String> getStdOut() {
@@ -48,46 +49,25 @@ public class FolderBatchWriterWithCmdCB extends AbstractFolderBatchWriter {
 			cmds[i] = cmds[i].replace("%dir%", path);
 		}
 
-		pbuilder.command(getCmd());		
+		pbuilder.command(cmds);		
 		pbuilder.directory(new File(path));
-		
-		final String targetPath = path;
-		try {
-			Process process = pbuilder.start();										
-			ProcessHandle ph = process.toHandle();
 
-			ph.onExit().thenAccept(handle -> {
-				if (process.exitValue()==0) {
-					//System.out.println("Finished:" + handle.info().commandLine().get());
-					//System.out.println("Finished:");
-					try {
-						String line = new BufferedReader(new InputStreamReader(process.getInputStream())).readLine();
-						stdOut.add(line);
-						//System.out.println(" ==>" + line);
-					} catch (IOException e) {
-						e.printStackTrace();
-					}					
-					if (cleanup) {
-						try {
-							//System.out.println(handle.info().commandLine().get());
-							//System.out.println("delete " + targetPath);
-							FileUtils.deleteDirectory(new File(targetPath));
-						} catch (IOException e) {
-							e.printStackTrace();
-						}
-					}					
-				}
-				else {
-					System.out.println("Error while executing CB command: exit=" + process.exitValue());
-					Stream<String> errs=new BufferedReader(new InputStreamReader(process.getErrorStream())).lines();
-					errs.forEach(e -> System.out.println(e)); 
-				}
-				
-				});
-			ph.onExit().get();
+		try {
+			Process process = pbuilder.start();											
+			String line = new BufferedReader(new InputStreamReader(process.getInputStream())).readLine();
+	
 			int exitCode = process.waitFor();
 			if (exitCode != 0) {
 				System.out.println(" Execution failed");
+			} else {
+				stdOut.add(line);
+				if (cleanup) {
+					try {
+						FileUtils.deleteDirectory(new File(path));
+					} catch (IOException e) {
+						e.printStackTrace();
+					}
+				}					
 			}
 		} catch (Exception e) {
 			e.printStackTrace();
