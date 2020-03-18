@@ -22,7 +22,7 @@ public class RandomDataGenerator {
 	protected ArrayList<String> states = new ArrayList<String>();
 	protected ArrayList<String> companies = new ArrayList<String>();
 
-	protected SimpleDateFormat df = new SimpleDateFormat("MMM DD YYYY");
+	protected SimpleDateFormat df = new SimpleDateFormat("MMM dd YYYY");
 	protected static final int DR = 5 * 365 * 24 * 3600 * 1000;
 
 	protected final boolean generateOperations;
@@ -105,9 +105,10 @@ public class RandomDataGenerator {
 		result[2] = cities.get(idx);
 		result[3] = states.get(idx);
 
-		result[4] = df
+		result[5] = df
 				.format(Date.from(Instant.ofEpochMilli(System.currentTimeMillis() - Math.round(Math.random() * DR))));
-		result[5] = String.format("%016d", Math.round(Math.random() * 10000000000000000L));
+
+		result[4] = String.format("%016d", Math.round(Math.random() * 10000000000000000L));
 
 		result[0] = result[0] + " ".repeat(41 - result[0].length());
 

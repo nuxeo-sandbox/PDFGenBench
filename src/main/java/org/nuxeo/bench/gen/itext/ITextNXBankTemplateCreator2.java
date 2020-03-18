@@ -3,6 +3,7 @@ package org.nuxeo.bench.gen.itext;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
+import java.util.GregorianCalendar;
 
 import org.nuxeo.bench.gen.PDFTemplateGenerator;
 
@@ -25,23 +26,23 @@ public class ITextNXBankTemplateCreator2 extends ITextNXBankTemplateCreator impl
 		
 		Operation obb = new Operation();
 		obb.label="Beginning Balance";
-		Calendar cal = Calendar.getInstance();
-		cal.add(Calendar.DAY_OF_MONTH, 0);
+		Calendar cal = new GregorianCalendar(2020, 0, 1);
 		obb.date = cal.getTime();
 
 		obb.strValue=mkTag("Balance",12);		
 		keys.add(obb.strValue);
 		operations.add(obb);
 
+		cal.add(Calendar.DAY_OF_MONTH, 3);
+		
 		for (int i = 1; i < 15; i++) {
 			Operation op = new Operation();
 
 			
 			op.label = mkTag("OP-" + String.format("%02d", i), 30) ;
 			keys.add(op.label);			
-			
-			cal = Calendar.getInstance();
-			cal.add(Calendar.DAY_OF_MONTH, i);
+						
+			cal.add(Calendar.DAY_OF_MONTH, 1);
 			op.date = cal.getTime();
 
 			op.strValue=mkTag("OPVal" + String.format("%02d", i) ,12);
@@ -62,7 +63,7 @@ public class ITextNXBankTemplateCreator2 extends ITextNXBankTemplateCreator impl
 	protected void printOperation(Table table) {
 
 		for (Operation op : operations) {
-			table.addCell(createCell(new SimpleDateFormat("MMM dd, YYYY").format(op.date)))
+			table.addCell(createCell(new SimpleDateFormat("MMM dd").format(op.date)))
 					.setTextAlignment(TextAlignment.LEFT);
 			table.addCell(createCell(op.label).setTextAlignment(TextAlignment.CENTER));
 
@@ -76,9 +77,7 @@ public class ITextNXBankTemplateCreator2 extends ITextNXBankTemplateCreator impl
 		}
 		table.addCell(new Cell(1, 4).setBorder(Border.NO_BORDER));
 		table.addCell(new Cell(1, 3).setBorder(Border.NO_BORDER));
-		table.addCell(createCell(mkTag("Total", 12)+ "     ")).setTextAlignment(TextAlignment.CENTER);
-
-		
+		table.addCell(createCell(mkTag("Total", 12)+ "     ")).setTextAlignment(TextAlignment.CENTER);		
 	}
 
 }

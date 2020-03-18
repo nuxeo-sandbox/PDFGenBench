@@ -1,5 +1,12 @@
 import java.io.File;
 import java.net.URL;
+import java.text.SimpleDateFormat;
+import java.time.Instant;
+import java.time.LocalDate;
+import java.time.format.DateTimeFormatter;
+import java.util.Calendar;
+import java.util.Date;
+import java.util.GregorianCalendar;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
@@ -57,5 +64,26 @@ public class BenchRandomGen {
 		Double throughput = counter.get() * 1.0 /((t1-t0)/1000);		
 
 		System.out.println("Throughput:" + throughput);
+	}
+
+	protected SimpleDateFormat df = new SimpleDateFormat("MMM dd YYYY");
+	protected static final int DR = 5 * 365 * 24 * 3600 * 1000;
+
+	@Test
+	public void testDate() {
+		
+		for (int dm = 24; dm > 0; dm--) {
+			
+			int dy = dm/12;
+			int m = dm - dy*12;
+			System.out.println("dy =" + dy + " -- m =" + m);
+			Date date = new GregorianCalendar(2020-dy, m, 27).getTime();
+			System.out.println(df.format(date));
+			System.out.println(LocalDate.of( 2020-dy, m+1, 27 ).format(DateTimeFormatter.ofPattern("MMM dd YYYY")));
+			//System.out.println(df.format(LocalDate.of( 2020-dy, m+1, 27 )));
+		}
+		
+
+		
 	}
 }

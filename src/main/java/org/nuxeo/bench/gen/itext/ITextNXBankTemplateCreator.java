@@ -147,7 +147,7 @@ public class ITextNXBankTemplateCreator implements PDFTemplateGenerator {
 
 		double total = 0;
 		for (Operation op : operations) {
-			table.addCell(createCell(new SimpleDateFormat("MMM dd, YYYY").format(op.date)))
+			table.addCell(createCell(new SimpleDateFormat("MMM dd").format(op.date)))
 					.setTextAlignment(TextAlignment.LEFT);
 			table.addCell(createCell(op.label).setTextAlignment(TextAlignment.CENTER));
 
