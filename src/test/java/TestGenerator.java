@@ -75,7 +75,7 @@ public class TestGenerator {
 			String key = data[data.length-1];
 			String[] data2= rnd.generate(key);
 
-			//System.out.println(printData(data));
+			System.out.println(printData(data));
 			//System.out.println(printData(data2));						
 			
 			for (int i = 0; i < data.length; i++) { 

@@ -47,13 +47,14 @@ public class TestFakeBlobs {
 	    out = new ByteArrayOutputStream();			
 		bg.getStream(key, out);		
 		
-		pdfData = out.toByteArray();		
-		String txt2 = stripper.getText(PDDocument.load(new ByteArrayInputStream(pdfData)));
+		byte[] pdfData2 = out.toByteArray();		
+		String txt2 = stripper.getText(PDDocument.load(new ByteArrayInputStream(pdfData2)));
 
 		assertEquals(txt, txt2);
+		assertEquals(pdfData.length, pdfData2.length);
 		
 		md.reset();
-		md.update(pdfData);
+		md.update(pdfData2);
 	    byte[] digest2 = md.digest();
 
 	    String hexd2= ITextNXBankStatementGenerator.toHexString(digest2);
