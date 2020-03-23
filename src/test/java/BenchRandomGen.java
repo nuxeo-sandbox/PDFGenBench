@@ -1,3 +1,5 @@
+import static org.junit.Assert.assertEquals;
+
 import java.io.File;
 import java.net.URL;
 import java.text.SimpleDateFormat;
@@ -14,6 +16,7 @@ import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
 
 import org.junit.Test;
+import org.nuxeo.bench.blob.KeyCodec;
 import org.nuxeo.bench.rnd.RandomDataGenerator;
 
 public class BenchRandomGen {
@@ -87,12 +90,54 @@ public class BenchRandomGen {
 	}
 	
 	@Test
-	public void testRandomSequence() {
+	public void testEncodeNumbersAsString() {
 		
-	    Random random = new Random(1000L);
+		String max = KeyCodec.encode(Long.MAX_VALUE);		
+		//System.out.println(max);
+		assertEquals(Long.MAX_VALUE, KeyCodec.decode(max));
+		
+		String min = KeyCodec.encode(Long.MIN_VALUE);		
+		//System.out.println(min);
+		assertEquals(Long.MIN_VALUE, KeyCodec.decode(min));
+		
+		
+		max = KeyCodec.encode(Integer.MAX_VALUE);		
+		//System.out.println(max);
+		assertEquals(Integer.MAX_VALUE, KeyCodec.decode(max));
+		
+		min = KeyCodec.encode(Integer.MIN_VALUE);		
+		//System.out.println(min);
+		assertEquals(Integer.MIN_VALUE, KeyCodec.decode(min));
+		
+		
+		Random rnd = new Random();
+		for (int x = 0; x < 1000; x++) {
+			long l = rnd.nextLong();
+			String k = KeyCodec.encode(l);
+			//System.out.println(k);
+			assertEquals(l, KeyCodec.decode(k));
+			
+			int i = rnd.nextInt();
+			k = KeyCodec.encode(i);
+			//System.out.println(k);
+			assertEquals(i, KeyCodec.decode(k));						
+		}
+			
+		
+		// "1677235490412433516:0709902258027561473:0018"
+		long s1 = 1677235490412433516L;
+		long s2 = 709902258027561473L;
+		int m = 18;
+		
+		String key = KeyCodec.encodeSeeds(s1, s2, m);
+		System.out.println("1677235490412433516:0709902258027561473:0018");
+		System.out.println(key);
+		long[] s = KeyCodec.decodeSeeds(key);
+		assertEquals(s1, s[0]);
+		assertEquals(s2, s[1]);
+		assertEquals(m, s[2]);
+		
+		
 
-	    System.out.println(random.nextDouble());
-	    System.out.println(random.nextDouble());
-	    System.out.println(random.nextDouble());
 	}
 }
