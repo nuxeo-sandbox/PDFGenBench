@@ -74,14 +74,18 @@ public class ITextNXBankStatementGenerator implements PDFFileGenerator {
 		doc.close();
 	}
 
+	
 	public SmtMeta generate(OutputStream buffer) throws Exception {
+		String[] tokens = rndGen.generate();
+		return generate(buffer, tokens);
+	}
+	
+	public SmtMeta generate(OutputStream buffer, String[] tokens) throws Exception {
 
 		DigestOutputStream db = null;
 		
 		CountingOutputStream cout = null;
 		
-		
-		String[] tokens = rndGen.generate();
 		PdfReader pdfReader = new PdfReader(new ByteArrayInputStream(template));
 
 		WriterProperties wp = new WriterProperties();
@@ -128,7 +132,7 @@ public class ITextNXBankStatementGenerator implements PDFFileGenerator {
 		return new SmtMeta(md5, fileName, fileSize, tokens);
 	}
 
-	protected static String toHexString(byte[] bytes) {
+	public static String toHexString(byte[] bytes) {
 		StringBuilder hexString = new StringBuilder();
 
 		for (int i = 0; i < bytes.length; i++) {

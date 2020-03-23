@@ -85,7 +85,7 @@ public class RandomDataGenerator {
 		return generate(null, null, null);
 	}
 	
-	protected String seeds2Id(Long seed1, Long seed2, Integer dm) {
+	public String seeds2Id(Long seed1, Long seed2, Integer dm) {
 		
 		StringBuffer sb = new StringBuffer();
 		
