@@ -44,34 +44,45 @@ public class TestGenerator {
 	}
 	
 
+	protected String printData(String[] data) {
+
+		StringBuffer sb = new StringBuffer();
+		
+		for (String entry:data) {
+			sb.append(entry);
+			sb.append(" -- ");			
+		}		
+		return sb.toString();
+	}
+	
 	@Test
 	public void testGenerateSerie() throws Exception {
 		RandomDataGenerator rnd = getRndGenerator(true);
 		
 		List<String[]> serie = rnd.generateSerie(24);
 		String m ="";
-		for (String[] data : serie) {
+				
+		for (String[] data : serie) {			
 			
+			// check same name
 			assertEquals(serie.get(0)[0], data[0]);
+			// check month
 			assertEquals(data[5].trim().substring(0,3), data[6].trim());			
 			assertNotEquals(m, data[6].trim());
 			m = data[6].trim();
 
-			StringBuffer sb = new StringBuffer();
+			// check replayble
+			String key = data[data.length-1];
+			String[] data2= rnd.generate(key);
+
+			//System.out.println(printData(data));
+			//System.out.println(printData(data2));						
 			
-			sb.append(data[0]);
-			sb.append(" -- ");
-			sb.append(data[5]);
-			sb.append(" -- ");
-			sb.append(data[6]);
-			sb.append(" -- ");
-			sb.append(data[8]);			
-			
-			//System.out.println(sb.toString());
-			
+			for (int i = 0; i < data.length; i++) { 
+				assertEquals(data[i], data2[i]);	
+			}			
 		}
 	}
-	
 	
 	@Test
 	public void canGenerateRandomData() throws Exception {

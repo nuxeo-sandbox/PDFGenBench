@@ -7,6 +7,7 @@ import java.time.format.DateTimeFormatter;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.GregorianCalendar;
+import java.util.Random;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
@@ -83,7 +84,15 @@ public class BenchRandomGen {
 			//System.out.println(df.format(LocalDate.of( 2020-dy, m+1, 27 )));
 		}
 		
-
+	}
+	
+	@Test
+	public void testRandomSequence() {
 		
+	    Random random = new Random(1000L);
+
+	    System.out.println(random.nextDouble());
+	    System.out.println(random.nextDouble());
+	    System.out.println(random.nextDouble());
 	}
 }
